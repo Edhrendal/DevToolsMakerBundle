@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -eu
+
+readonly PROJECT_DIR="$(pwd)"
+source "${PROJECT_DIR}"/bin/common.inc.bash
+
+dockerisePhpImage
+
+php ${scriptParameters}

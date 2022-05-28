@@ -1,0 +1,4 @@
+/docker/php/conf/custom.xdebug.ini
+
+composer.lock
+/vendor/
