@@ -18,7 +18,7 @@ final class DevToolsMakerExtension extends Extension
        (
            new PhpFileLoader(
                $container,
-               new FileLocator(__DIR__ . '../Resources/config'),
+               new FileLocator(__DIR__ . '/../Resources/config'),
                env: 'dev'
            )
        )
