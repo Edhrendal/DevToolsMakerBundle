@@ -13,5 +13,7 @@ return static function (ContainerConfigurator $configurator): void {
         ->autowire()
         ->autoconfigure();
 
-    $makerServices->set(MakeAutowireCommand::class);
+    $makerServices
+        ->set(MakeAutowireCommand::class)
+        ->bind('$projectDir', '%kernel.project_dir%');
 };

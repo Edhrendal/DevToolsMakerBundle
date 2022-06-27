@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Edhrendal\DevToolsMakerBundle\Command;
 
+use Edhrendal\DevToolsMakerBundle\Command\Traits\Parameter\ProjectDirParameterTrait;
 use Symfony\Component\Console\{
     Attribute\AsCommand,
     Command\Command,
@@ -20,6 +21,8 @@ use Symfony\Component\Console\{
 )]
 final class MakeAutowireCommand extends Command
 {
+    use ProjectDirParameterTrait;
+
     private const ARGUMENT_FQCN = 'fqcn';
     private const OPTION_ACCESSOR = 'getter-name';
 
