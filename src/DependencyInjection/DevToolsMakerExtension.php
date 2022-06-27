@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Edhrendal\DevToolsMakerBundle\DependencyInjection;
 
+use Edhrendal\DevToolsMakerBundle\Command\MakeAutowireCommand;
 use Symfony\Component\Config\{
     Definition\Exception\InvalidConfigurationException,
     FileLocator
@@ -25,22 +26,25 @@ final class DevToolsMakerExtension extends Extension
      */
     public function load(array $configs, ContainerBuilder $container): void
     {
-       (
-           new PhpFileLoader(
-               $container,
-               new FileLocator(__DIR__ . '/../Resources/config'),
-               env: 'dev'
-           )
-       )
-           ->load('commands.php');
+        (
+            new PhpFileLoader(
+                $container,
+                new FileLocator(__DIR__ . '/../Resources/config'),
+                env: 'dev'
+            )
+        )
+            ->load('commands.php');
 
-       // Validate configuration values
-        $this->resolveConfigurationRootNodeValues(
+        // Validate configuration values
+        $resolvedConfigurationValues = $this->resolveConfigurationRootNodeValues(
             $this->processConfiguration(
                 configuration: $this->getConfiguration(),
                 configs: $configs
             )
         );
+
+        // Dynamic configuration value injection
+        $this->injectDynamicConfigurationValues($container, $resolvedConfigurationValues);
     }
 
     /**
@@ -54,8 +58,9 @@ final class DevToolsMakerExtension extends Extension
 
     /**
      * @param array<mixed> $processedConfigurationValues
+     * @return array{'root_namespace': string}
      */
-    private function resolveConfigurationRootNodeValues(array $processedConfigurationValues): void
+    private function resolveConfigurationRootNodeValues(array $processedConfigurationValues): array
     {
         $rootResolver = new OptionsResolver();
         $rootResolver
@@ -64,12 +69,24 @@ final class DevToolsMakerExtension extends Extension
             ->allowedTypes('string');
 
         try {
-            $rootResolver->resolve($processedConfigurationValues);
+            return $rootResolver->resolve($processedConfigurationValues);
         } catch (ExceptionInterface $resolverException) {
             throw new InvalidConfigurationException(
                 message: 'Configuration for "dev_tools_maker" is invalid.',
                 previous: $resolverException
             );
         }
+    }
+
+    /**
+     * @param array{'root_namespace': string} $resolvedConfigurationValues
+     */
+    private function injectDynamicConfigurationValues(
+        ContainerBuilder $container,
+        array $resolvedConfigurationValues
+    ): void {
+        $container
+            ->getDefinition(MakeAutowireCommand::class)
+            ->addMethodCall('setProjectNamespace', [$resolvedConfigurationValues['root_namespace']]);
     }
 }
